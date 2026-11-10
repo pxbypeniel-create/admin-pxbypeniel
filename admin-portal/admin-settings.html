@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Home Dashboard | PXByPeniel</title>
+    <title>Admin Settings | PXByPeniel</title>
     <!-- FontAwesome Icons -->
     <link
       rel="stylesheet"
@@ -173,7 +173,7 @@
         padding: 2rem 1rem;
         display: flex;
         flex-direction: column;
-        gap: 2.5rem;
+        gap: 2rem;
       }
 
       .admin-card {
@@ -191,165 +191,116 @@
         margin-bottom: 1.25rem;
         padding-bottom: 0.75rem;
         border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
       }
 
-      /* Admin Profile Banner */
-      .admin-welcome-banner {
-        background-color: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        padding: 2.5rem 1.5rem;
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .form-group {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 1.25rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        gap: 0.4rem;
       }
 
-      .admin-avatar-circle {
-        width: 6.5rem;
-        height: 6.5rem;
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      input,
+      select {
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        outline: none;
+        font-family: inherit;
+        font-size: 0.875rem;
+      }
+
+      input[type="file"] {
+        padding: 0.5rem;
+        cursor: pointer;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: var(--accent-gold);
+      }
+
+      .btn-gold {
+        background-color: var(--accent-gold);
+        color: #000;
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn-gold:hover {
+        background-color: var(--accent-gold-hover);
+      }
+
+      .btn-danger-outline {
+        background-color: var(--danger-bg);
+        color: var(--danger-red);
+        border: 1px solid var(--danger-red);
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-danger-outline:hover {
+        background-color: var(--danger-red);
+        color: #fff;
+      }
+
+      /* Profile Avatar Preview */
+      .avatar-preview-container {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .settings-avatar-circle {
+        width: 5rem;
+        height: 5rem;
         border-radius: 50%;
         background-color: var(--bg-input);
-        border: 3px solid var(--accent-gold);
+        border: 2px solid var(--accent-gold);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.25rem;
+        font-size: 1.75rem;
         font-weight: 700;
         color: var(--accent-gold);
         overflow: hidden;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
       }
 
-      .admin-avatar-circle img {
+      .settings-avatar-circle img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-      }
-
-      .admin-id-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        background-color: var(--bg-input);
-        border: 1px solid var(--border-color);
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        color: var(--text-muted);
-      }
-
-      .copy-btn {
-        background: none;
-        border: none;
-        color: var(--accent-gold);
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 0.8rem;
-      }
-
-      .copy-btn:hover {
-        text-decoration: underline;
-      }
-
-      /* Metrics Grid */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.25rem;
-      }
-
-      .stat-card {
-        background-color: var(--bg-input);
-        border: 1px solid var(--border-color);
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        text-align: center;
-      }
-
-      .stat-value {
-        font-size: 1.85rem;
-        font-weight: 700;
-        color: var(--accent-gold);
-        margin-top: 0.35rem;
-      }
-
-      .stat-label {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        font-weight: 600;
-      }
-
-      /* Bar Chart Styling */
-      .graph-container {
-        height: 220px;
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        padding: 1rem 0 0 0;
-        gap: 1rem;
-        border-bottom: 1px solid var(--border-color);
-      }
-
-      .bar-group {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        height: 100%;
-        justify-content: flex-end;
-      }
-
-      .bar {
-        width: 100%;
-        max-width: 42px;
-        background: linear-gradient(
-          to top,
-          var(--accent-gold),
-          var(--accent-gold-hover)
-        );
-        border-radius: 4px 4px 0 0;
-        transition: height 0.5s ease;
-      }
-
-      .bar-label {
-        font-size: 0.78rem;
-        color: var(--text-muted);
-        font-weight: 600;
-      }
-
-      /* Table Container */
-      .table-container {
-        overflow-x: auto;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.875rem;
-        text-align: left;
-      }
-
-      th,
-      td {
-        padding: 0.875rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-      }
-
-      th {
-        color: var(--accent-gold);
-      }
-
-      .badge-green {
-        color: var(--status-green);
-        font-weight: 700;
-      }
-      .badge-pending {
-        color: #eab308;
-        font-weight: 700;
       }
 
       /* Loading Overlay */
@@ -391,7 +342,7 @@
     <!-- Page Transition Overlay -->
     <div id="nav-loading-overlay">
       <div class="spinner"></div>
-      <p style="font-size: 0.875rem; font-weight: 600">Loading section...</p>
+      <p style="font-size: 0.875rem; font-weight: 600">Processing request...</p>
     </div>
 
     <!-- Navigation Bar -->
@@ -400,7 +351,9 @@
         PxByPeniel <span>[ADMIN]</span>
       </a>
       <div class="desktop-nav">
-        <a onclick="delayedNavigate('admin-home.html')" class="nav-link active"
+        <a
+          onclick="delayedNavigate('admin-home.html')"
+          class="nav-link inactive"
           >Home</a
         >
         <a
@@ -415,7 +368,7 @@
         >
         <a
           onclick="delayedNavigate('admin-settings.html')"
-          class="nav-link inactive"
+          class="nav-link active"
           >Settings</a
         >
       </div>
@@ -451,7 +404,9 @@
 
     <!-- Mobile Drawer -->
     <div id="mobile-menu" class="mobile-drawer">
-      <a onclick="delayedNavigate('admin-home.html')" class="mobile-link active"
+      <a
+        onclick="delayedNavigate('admin-home.html')"
+        class="mobile-link inactive"
         >Home</a
       >
       <a
@@ -466,134 +421,160 @@
       >
       <a
         onclick="delayedNavigate('admin-settings.html')"
-        class="mobile-link inactive"
+        class="mobile-link active"
         >Settings</a
       >
     </div>
 
-    <!-- Main Content Container -->
     <main>
-      <!-- 1. Central Admin Welcome & Profile Banner -->
-      <section class="admin-welcome-banner">
-        <div class="admin-avatar-circle" id="adminAvatarContainer">A</div>
+      <!-- 1. Admin Display Name & Phone Storage Avatar Upload -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-user-gear"></i> Admin Account Details & Avatar
+        </h2>
+
+        <div class="avatar-preview-container">
+          <div class="settings-avatar-circle" id="settingsAvatarPreview">A</div>
+          <div>
+            <p style="font-weight: 600; font-size: 0.9rem">
+              Profile Avatar Badge
+            </p>
+            <p style="font-size: 0.78rem; color: var(--text-muted)">
+              Upload a picture straight from your phone or device storage.
+            </p>
+          </div>
+        </div>
+
+        <form id="adminProfileForm" class="form-grid">
+          <div class="form-group">
+            <label>Admin Display Name</label>
+            <input
+              type="text"
+              id="adminDisplayName"
+              placeholder="e.g. PXByPeniel"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Upload Profile Picture from Device</label>
+            <input type="file" id="adminAvatarFile" accept="image/*" />
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1">
+            <label>Admin Email</label>
+            <input
+              type="email"
+              id="adminDisplayEmail"
+              placeholder="admin@pxbypeniel.com"
+              readonly
+              style="opacity: 0.7; cursor: not-allowed"
+            />
+          </div>
+          <div
+            class="form-group"
+            style="grid-column: 1 / -1; margin-top: 0.5rem"
+          >
+            <button type="submit" class="btn-gold">
+              <i class="fa-solid fa-floppy-disk"></i> Update Profile & Avatar in
+              Supabase
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 2. Security & Password Update -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-key"></i> Update Security Credentials
+        </h2>
+        <form id="updatePasswordForm" class="form-grid">
+          <div class="form-group">
+            <label>New Private Password</label>
+            <input
+              type="password"
+              id="newPassword"
+              placeholder="Minimum 6 characters"
+              minlength="6"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              placeholder="Re-enter new password"
+              minlength="6"
+              required
+            />
+          </div>
+          <div
+            class="form-group"
+            style="grid-column: 1 / -1; margin-top: 0.5rem"
+          >
+            <button type="submit" class="btn-gold">
+              <i class="fa-solid fa-shield-halved"></i> Update Password in
+              Supabase
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 3. Appearance & Theme Selection Control -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-palette"></i> Display Theme Preference
+        </h2>
+        <form id="themePreferenceForm" class="form-grid">
+          <div class="form-group">
+            <label>Interface Theme Mode</label>
+            <select id="themeSelectDropdown">
+              <option value="system">System Default</option>
+              <option value="dark">Dark Mode</option>
+              <option value="light">Light Mode</option>
+            </select>
+          </div>
+          <div
+            class="form-group"
+            style="grid-column: 1 / -1; margin-top: 0.5rem"
+          >
+            <button type="submit" class="btn-gold">
+              <i class="fa-solid fa-circle-half-stroke"></i> Save Theme
+              Preference
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 4. Session Termination & Sign Out -->
+      <section class="admin-card">
+        <h2
+          class="admin-card-header"
+          style="color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3)"
+        >
+          <i class="fa-solid fa-right-from-bracket"></i> Master Session Control
+        </h2>
+        <p
+          style="
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+          "
+        >
+          Signing out will safely clear your local session identity and lock
+          subfolder access. You will be redirected back to the root login portal
+          (`../index.html`).
+        </p>
         <div>
-          <h1
-            id="adminWelcomeTitle"
-            style="
-              font-size: 1.6rem;
-              font-weight: 700;
-              color: var(--accent-gold);
-            "
-          >
-            Welcome, Admin
-          </h1>
-          <p
-            style="
-              font-size: 0.875rem;
-              color: var(--text-muted);
-              margin-top: 0.25rem;
-            "
-          >
-            PXByPeniel Studio Master Management Dashboard
-          </p>
-        </div>
-        <div class="admin-id-badge">
-          <span
-            >Admin ID:
-            <strong id="adminIdCode" style="color: var(--text-main)"
-              >PX-ADM-78492</strong
-            ></span
-          >
-          <button class="copy-btn" onclick="copyAdminId()">Copy ID</button>
-        </div>
-      </section>
-
-      <!-- 2. High-Level Metrics Counters -->
-      <section class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total Bookings</div>
-          <div class="stat-value" id="statTotalBookings">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Gross Revenue</div>
-          <div class="stat-value" id="statRevenue">₦0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Pending Verifications</div>
-          <div class="stat-value" id="statPending">0</div>
-        </div>
-      </section>
-
-      <!-- 3. Studio Revenue Graph & Analytics -->
-      <section class="admin-card">
-        <h2 class="admin-card-header">
-          <i class="fa-solid fa-chart-line"></i> Revenue & Session Volume
-          Metrics
-        </h2>
-        <div class="graph-container" id="revenueGraph">
-          <div class="bar-group">
-            <div class="bar" style="height: 35%"></div>
-            <span class="bar-label">Mon</span>
-          </div>
-          <div class="bar-group">
-            <div class="bar" style="height: 60%"></div>
-            <span class="bar-label">Tue</span>
-          </div>
-          <div class="bar-group">
-            <div class="bar" style="height: 45%"></div>
-            <span class="bar-label">Wed</span>
-          </div>
-          <div class="bar-group">
-            <div class="bar" style="height: 80%"></div>
-            <span class="bar-label">Thu</span>
-          </div>
-          <div class="bar-group">
-            <div class="bar" style="height: 95%"></div>
-            <span class="bar-label">Fri</span>
-          </div>
-          <div class="bar-group">
-            <div class="bar" style="height: 70%"></div>
-            <span class="bar-label">Sat</span>
-          </div>
-          <div class="bar-group">
-            <div class="bar" style="height: 55%"></div>
-            <span class="bar-label">Sun</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- 4. Recent Bookings Feed -->
-      <section class="admin-card">
-        <h2 class="admin-card-header">
-          <i class="fa-solid fa-list-check"></i> Recent Client Bookings
-        </h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Session ID</th>
-                <th>Client Name</th>
-                <th>Package</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="adminRecentBookingsBody">
-              <tr>
-                <td
-                  colspan="5"
-                  style="text-align: center; color: var(--text-muted)"
-                >
-                  Loading recent bookings...
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <button class="btn-danger-outline" onclick="handleAdminSignOut()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out of
+            Admin Portal
+          </button>
         </div>
       </section>
     </main>
 
     <script>
+      // Navigation Delay & Mobile Menu
       function delayedNavigate(url) {
         document.getElementById("nav-loading-overlay").classList.add("active");
         setTimeout(() => {
@@ -607,6 +588,7 @@
         mobileMenu.classList.toggle("open"),
       );
 
+      // Theme Engine
       const themeBtn = document.getElementById("themeToggleBtn");
       const themeIcon = document.getElementById("themeIcon");
 
@@ -614,30 +596,51 @@
         if (theme === "light") {
           document.documentElement.setAttribute("data-theme", "light");
           themeIcon.className = "fa-solid fa-sun";
-        } else {
+        } else if (theme === "dark") {
           document.documentElement.removeAttribute("data-theme");
           themeIcon.className = "fa-solid fa-moon";
+        } else {
+          if (
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: light)").matches
+          ) {
+            document.documentElement.setAttribute("data-theme", "light");
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+          }
+          themeIcon.className = "fa-solid fa-circle-half-stroke";
         }
       }
 
-      applyTheme(localStorage.getItem("px_theme") || "dark");
+      let currentTheme = localStorage.getItem("px_theme") || "system";
+      applyTheme(currentTheme);
+      document.getElementById("themeSelectDropdown").value = currentTheme;
 
       themeBtn.addEventListener("click", () => {
-        const next =
-          document.documentElement.getAttribute("data-theme") === "light"
-            ? "dark"
-            : "light";
-        localStorage.setItem("px_theme", next);
-        applyTheme(next);
+        if (currentTheme === "system") currentTheme = "light";
+        else if (currentTheme === "light") currentTheme = "dark";
+        else currentTheme = "system";
+
+        localStorage.setItem("px_theme", currentTheme);
+        document.getElementById("themeSelectDropdown").value = currentTheme;
+        applyTheme(currentTheme);
       });
 
-      function copyAdminId() {
-        const idText = document.getElementById("adminIdCode").textContent;
-        navigator.clipboard.writeText(idText).then(() => {
-          alert("Admin ID copied to clipboard: " + idText);
+      // Save Theme Preference
+      document
+        .getElementById("themePreferenceForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const selectedTheme = document.getElementById(
+            "themeSelectDropdown",
+          ).value;
+          currentTheme = selectedTheme;
+          localStorage.setItem("px_theme", selectedTheme);
+          applyTheme(selectedTheme);
+          alert("Display theme preference saved successfully!");
         });
-      }
 
+      // Supabase Initialization
       const SUPABASE_URL = "https://kplwvidpctgjwkxsabov.supabase.co";
       const SUPABASE_ANON_KEY =
         "sb_publishable_ggIovP3ZABeeHr-kIyUy7g_f_Vcy_4k";
@@ -645,96 +648,151 @@
         ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
         : null;
 
-      async function loadAdminDashboard() {
-        let adminName =
-          localStorage.getItem("px_admin_name") ||
-          localStorage.getItem("px_user_name") ||
-          "Master";
+      // Hydrate Admin Details & Avatar
+      async function initSettingsPage() {
+        let adminName = localStorage.getItem("px_admin_name") || "Master";
+        let adminEmail =
+          localStorage.getItem("px_admin_email") || "admin@pxbypeniel.com";
         let adminAvatar = localStorage.getItem("px_admin_avatar") || "";
 
-        adminName = adminName.charAt(0).toUpperCase() + adminName.slice(1);
-        document.getElementById("adminWelcomeTitle").textContent =
-          `Welcome, ${adminName} Admin`;
+        document.getElementById("adminDisplayName").value = adminName;
+        document.getElementById("adminDisplayEmail").value = adminEmail;
 
-        const avatarContainer = document.getElementById("adminAvatarContainer");
-        if (adminAvatar) {
-          avatarContainer.innerHTML = `<img src="${adminAvatar}" alt="Admin Avatar" onerror="this.parentElement.innerHTML='${adminName.charAt(0).toUpperCase()}'" />`;
-        } else {
-          avatarContainer.textContent = adminName.charAt(0).toUpperCase();
-        }
+        updateAvatarPreview(adminAvatar, adminName);
 
         if (supabaseClient) {
           const { data: sessionData } = await supabaseClient.auth.getSession();
-          if (sessionData?.session?.user?.user_metadata) {
-            const meta = sessionData.session.user.user_metadata;
-            if (meta.full_name) {
-              adminName = meta.full_name;
-              document.getElementById("adminWelcomeTitle").textContent =
-                `Welcome, ${adminName} Admin`;
-              avatarContainer.textContent = adminName.charAt(0).toUpperCase();
+          if (sessionData?.session?.user) {
+            const user = sessionData.session.user;
+            document.getElementById("adminDisplayEmail").value =
+              user.email || adminEmail;
+
+            if (user.user_metadata?.full_name) {
+              adminName = user.user_metadata.full_name;
+              document.getElementById("adminDisplayName").value = adminName;
+              localStorage.setItem("px_admin_name", adminName);
             }
-            if (meta.avatar_url) {
-              adminAvatar = meta.avatar_url;
+
+            if (user.user_metadata?.avatar_url) {
+              adminAvatar = user.user_metadata.avatar_url;
               localStorage.setItem("px_admin_avatar", adminAvatar);
-              avatarContainer.innerHTML = `<img src="${adminAvatar}" alt="Admin Avatar" />`;
             }
-          }
-
-          const { data: bookings, error } = await supabaseClient
-            .from("client_bookings")
-            .select("*")
-            .order("created_at", { ascending: false });
-          if (!error && bookings) {
-            document.getElementById("statTotalBookings").textContent =
-              bookings.length;
-
-            const totalRev = bookings.reduce(
-              (acc, b) => acc + (b.verified ? Number(b.amount || 0) : 0),
-              0,
-            );
-            document.getElementById("statRevenue").textContent =
-              "₦" + totalRev.toLocaleString();
-
-            const pendingCount = bookings.filter((b) => !b.verified).length;
-            document.getElementById("statPending").textContent = pendingCount;
-
-            const tbody = document.getElementById("adminRecentBookingsBody");
-            if (bookings.length === 0) {
-              tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted)">No bookings recorded yet.</td></tr>`;
-            } else {
-              tbody.innerHTML = bookings
-                .slice(0, 5)
-                .map((b) => {
-                  const statusBadge =
-                    b.status === "Completed"
-                      ? `<span class="badge-green">Completed</span>`
-                      : `<span class="badge-pending">${b.status || "Pending"}</span>`;
-                  return `
-                <tr>
-                  <td style="font-weight: 700;">${b.session_id}</td>
-                  <td>${escapeHtml(b.client_name)}</td>
-                  <td>${escapeHtml(b.package_name)}</td>
-                  <td>₦${Number(b.amount).toLocaleString()}</td>
-                  <td>${statusBadge}</td>
-                </tr>
-              `;
-                })
-                .join("");
-            }
+            updateAvatarPreview(adminAvatar, adminName);
           }
         }
       }
 
-      function escapeHtml(str) {
-        return str
-          ? str
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-          : "";
+      function updateAvatarPreview(url, name) {
+        const preview = document.getElementById("settingsAvatarPreview");
+        if (url) {
+          preview.innerHTML = `<img src="${url}" alt="Avatar" onerror="this.parentElement.innerHTML='${name.charAt(0).toUpperCase()}'" />`;
+        } else {
+          preview.textContent = name ? name.charAt(0).toUpperCase() : "A";
+        }
       }
 
-      document.addEventListener("DOMContentLoaded", loadAdminDashboard);
+      // Convert uploaded file from phone storage to Base64 string
+      function convertFileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+      }
+
+      // 1. Save Profile Display Name & Device Avatar File
+      document
+        .getElementById("adminProfileForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const updatedName = document
+            .getElementById("adminDisplayName")
+            .value.trim();
+          const fileInput = document.getElementById("adminAvatarFile");
+
+          let avatarDataUrl = localStorage.getItem("px_admin_avatar") || "";
+
+          if (fileInput.files && fileInput.files[0]) {
+            try {
+              avatarDataUrl = await convertFileToBase64(fileInput.files[0]);
+            } catch (err) {
+              alert("Error reading image file from storage.");
+              return;
+            }
+          }
+
+          if (supabaseClient) {
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.add("active");
+            const { error } = await supabaseClient.auth.updateUser({
+              data: { full_name: updatedName, avatar_url: avatarDataUrl },
+            });
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.remove("active");
+
+            if (error) {
+              alert("Failed to update profile in Supabase: " + error.message);
+              return;
+            }
+          }
+
+          localStorage.setItem("px_admin_name", updatedName);
+          localStorage.setItem("px_admin_avatar", avatarDataUrl);
+          updateAvatarPreview(avatarDataUrl, updatedName);
+
+          alert("Admin profile and avatar updated successfully!");
+        });
+
+      // 2. Update Password via Supabase Auth
+      document
+        .getElementById("updatePasswordForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const pass = document.getElementById("newPassword").value;
+          const confirmPass = document.getElementById("confirmPassword").value;
+
+          if (pass !== confirmPass) {
+            alert("Passwords do not match!");
+            return;
+          }
+
+          if (supabaseClient) {
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.add("active");
+            const { error } = await supabaseClient.auth.updateUser({
+              password: pass,
+            });
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.remove("active");
+
+            if (error) {
+              alert("Password Update Failed: " + error.message);
+            } else {
+              alert("Your password has been updated in Supabase successfully!");
+              e.target.reset();
+            }
+          }
+        });
+
+      // 3. Sign Out Handler
+      async function handleAdminSignOut() {
+        if (confirm("Are you sure you want to sign out?")) {
+          if (supabaseClient) {
+            await supabaseClient.auth.signOut();
+          }
+          localStorage.removeItem("px_admin_name");
+          localStorage.removeItem("px_admin_email");
+          localStorage.removeItem("px_admin_avatar");
+          delayedNavigate("../index.html");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", initSettingsPage);
     </script>
   </body>
 </html>
