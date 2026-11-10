@@ -219,7 +219,14 @@
         font-size: 2.25rem;
         font-weight: 700;
         color: var(--accent-gold);
+        overflow: hidden;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .admin-avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .admin-id-badge {
@@ -468,7 +475,7 @@
     <main>
       <!-- 1. Central Admin Welcome & Profile Banner -->
       <section class="admin-welcome-banner">
-        <div class="admin-avatar-circle" id="adminAvatarInitial">A</div>
+        <div class="admin-avatar-circle" id="adminAvatarContainer">A</div>
         <div>
           <h1
             id="adminWelcomeTitle"
@@ -587,7 +594,6 @@
     </main>
 
     <script>
-      // 1. Navigation Delay
       function delayedNavigate(url) {
         document.getElementById("nav-loading-overlay").classList.add("active");
         setTimeout(() => {
@@ -601,7 +607,6 @@
         mobileMenu.classList.toggle("open"),
       );
 
-      // 2. Theme Engine (Synced with admin-bookings.html)
       const themeBtn = document.getElementById("themeToggleBtn");
       const themeIcon = document.getElementById("themeIcon");
 
@@ -626,7 +631,6 @@
         applyTheme(next);
       });
 
-      // 3. Admin ID Copy Tool
       function copyAdminId() {
         const idText = document.getElementById("adminIdCode").textContent;
         navigator.clipboard.writeText(idText).then(() => {
@@ -634,7 +638,6 @@
         });
       }
 
-      // 4. Supabase Setup & Realtime Data Hydration
       const SUPABASE_URL = "https://kplwvidpctgjwkxsabov.supabase.co";
       const SUPABASE_ANON_KEY =
         "sb_publishable_ggIovP3ZABeeHr-kIyUy7g_f_Vcy_4k";
@@ -647,58 +650,79 @@
           localStorage.getItem("px_admin_name") ||
           localStorage.getItem("px_user_name") ||
           "Master";
+        let adminAvatar = localStorage.getItem("px_admin_avatar") || "";
+
         adminName = adminName.charAt(0).toUpperCase() + adminName.slice(1);
         document.getElementById("adminWelcomeTitle").textContent =
           `Welcome, ${adminName} Admin`;
-        document.getElementById("adminAvatarInitial").textContent = adminName
-          .charAt(0)
-          .toUpperCase();
 
-        if (!supabaseClient) return;
-
-        const { data: bookings, error } = await supabaseClient
-          .from("client_bookings")
-          .select("*")
-          .order("created_at", { ascending: false });
-        if (error || !bookings) return;
-
-        document.getElementById("statTotalBookings").textContent =
-          bookings.length;
-
-        const totalRev = bookings.reduce(
-          (acc, b) => acc + (b.verified ? Number(b.amount || 0) : 0),
-          0,
-        );
-        document.getElementById("statRevenue").textContent =
-          "₦" + totalRev.toLocaleString();
-
-        const pendingCount = bookings.filter((b) => !b.verified).length;
-        document.getElementById("statPending").textContent = pendingCount;
-
-        const tbody = document.getElementById("adminRecentBookingsBody");
-        if (bookings.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted)">No bookings recorded yet.</td></tr>`;
-          return;
+        const avatarContainer = document.getElementById("adminAvatarContainer");
+        if (adminAvatar) {
+          avatarContainer.innerHTML = `<img src="${adminAvatar}" alt="Admin Avatar" onerror="this.parentElement.innerHTML='${adminName.charAt(0).toUpperCase()}'" />`;
+        } else {
+          avatarContainer.textContent = adminName.charAt(0).toUpperCase();
         }
 
-        tbody.innerHTML = bookings
-          .slice(0, 5)
-          .map((b) => {
-            const statusBadge =
-              b.status === "Completed"
-                ? `<span class="badge-green">Completed</span>`
-                : `<span class="badge-pending">${b.status || "Pending"}</span>`;
-            return `
-            <tr>
-              <td style="font-weight: 700;">${b.session_id}</td>
-              <td>${escapeHtml(b.client_name)}</td>
-              <td>${escapeHtml(b.package_name)}</td>
-              <td>₦${Number(b.amount).toLocaleString()}</td>
-              <td>${statusBadge}</td>
-            </tr>
-          `;
-          })
-          .join("");
+        if (supabaseClient) {
+          const { data: sessionData } = await supabaseClient.auth.getSession();
+          if (sessionData?.session?.user?.user_metadata) {
+            const meta = sessionData.session.user.user_metadata;
+            if (meta.full_name) {
+              adminName = meta.full_name;
+              document.getElementById("adminWelcomeTitle").textContent =
+                `Welcome, ${adminName} Admin`;
+              avatarContainer.textContent = adminName.charAt(0).toUpperCase();
+            }
+            if (meta.avatar_url) {
+              adminAvatar = meta.avatar_url;
+              localStorage.setItem("px_admin_avatar", adminAvatar);
+              avatarContainer.innerHTML = `<img src="${adminAvatar}" alt="Admin Avatar" />`;
+            }
+          }
+
+          const { data: bookings, error } = await supabaseClient
+            .from("client_bookings")
+            .select("*")
+            .order("created_at", { ascending: false });
+          if (!error && bookings) {
+            document.getElementById("statTotalBookings").textContent =
+              bookings.length;
+
+            const totalRev = bookings.reduce(
+              (acc, b) => acc + (b.verified ? Number(b.amount || 0) : 0),
+              0,
+            );
+            document.getElementById("statRevenue").textContent =
+              "₦" + totalRev.toLocaleString();
+
+            const pendingCount = bookings.filter((b) => !b.verified).length;
+            document.getElementById("statPending").textContent = pendingCount;
+
+            const tbody = document.getElementById("adminRecentBookingsBody");
+            if (bookings.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted)">No bookings recorded yet.</td></tr>`;
+            } else {
+              tbody.innerHTML = bookings
+                .slice(0, 5)
+                .map((b) => {
+                  const statusBadge =
+                    b.status === "Completed"
+                      ? `<span class="badge-green">Completed</span>`
+                      : `<span class="badge-pending">${b.status || "Pending"}</span>`;
+                  return `
+                <tr>
+                  <td style="font-weight: 700;">${b.session_id}</td>
+                  <td>${escapeHtml(b.client_name)}</td>
+                  <td>${escapeHtml(b.package_name)}</td>
+                  <td>₦${Number(b.amount).toLocaleString()}</td>
+                  <td>${statusBadge}</td>
+                </tr>
+              `;
+                })
+                .join("");
+            }
+          }
+        }
       }
 
       function escapeHtml(str) {
