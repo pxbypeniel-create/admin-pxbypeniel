@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Bookings & CMS | PXByPeniel</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+      :root {
+        --bg-main: #0a0a0a;
+        --bg-card: #141414;
+        --bg-input: #1f1f1f;
+        --border-color: #262626;
+        --accent-gold: #d4af37;
+        --accent-gold-hover: #e5be3e;
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+        --danger-red: #ef4444;
+        --danger-bg: rgba(239, 68, 68, 0.15);
+        --status-green: #10b981;
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      [data-theme="light"] {
+        --bg-main: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-input: #f1f5f9;
+        --border-color: #e2e8f0;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --danger-red: #dc2626;
+        --danger-bg: rgba(220, 38, 38, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+
+      body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        min-height: 100vh;
+        padding-bottom: 5rem;
+      }
+
+      /* Navbar */
+      .navbar {
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 0.875rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .brand-logo {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.125rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .brand-logo span {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .desktop-nav {
+        display: none;
+        gap: 2rem;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .nav-link.active {
+        color: var(--accent-gold);
+        border-bottom: 2px solid var(--accent-gold);
+      }
+
+      .nav-link.inactive {
+        color: var(--text-muted);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .theme-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .hamburger-btn {
+        background: none;
+        border: none;
+        color: var(--accent-gold);
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+      }
+
+      .mobile-drawer {
+        display: none;
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        text-align: center;
+      }
+
+      .mobile-drawer.open {
+        display: block;
+      }
+
+      .mobile-drawer .mobile-link {
+        display: block;
+        padding: 0.75rem 0;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      @media (min-width: 768px) {
+        .desktop-nav { display: flex; }
+        .hamburger-btn { display: none; }
+        .mobile-drawer { display: none !important; }
+      }
+
+      main {
+        max-width: 68rem;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+
+      .admin-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      }
+
+      .admin-card-header {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+      }
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      input, textarea {
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        outline: none;
+        font-family: inherit;
+        font-size: 0.875rem;
+      }
+
+      input:focus, textarea:focus {
+        border-color: var(--accent-gold);
+      }
+
+      .btn-gold {
+        background-color: var(--accent-gold);
+        color: #000;
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn-gold:hover { background-color: var(--accent-gold-hover); }
+
+      .btn-danger {
+        background-color: var(--danger-bg);
+        color: var(--danger-red);
+        border: 1px solid var(--danger-red);
+        padding: 0.35rem 0.75rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+
+      .btn-success {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: var(--status-green);
+        border: 1px solid var(--status-green);
+        padding: 0.35rem 0.75rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+
+      .table-container { overflow-x: auto; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        text-align: left;
+      }
+
+      th, td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      th { color: var(--accent-gold); }
+
+      .badge-green { color: var(--status-green); font-weight: 700; }
+      .badge-red { color: var(--danger-red); font-weight: 700; }
+
+      /* Loading Overlay */
+      #nav-loading-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-gold);
+      }
+      #nav-loading-overlay.active { display: flex; }
+      .spinner {
+        width: 2.5rem; height: 2.5rem;
+        border: 3px solid rgba(212, 175, 55, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent-gold);
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1rem;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="nav-loading-overlay">
+      <div class="spinner"></div>
+      <p style="font-size: 0.875rem; font-weight: 600;">Loading section...</p>
+    </div>
+
+    <nav class="navbar">
+      <a onclick="delayedNavigate('admin-home.html')" class="brand-logo">
+        PxByPeniel <span>[ADMIN]</span>
+      </a>
+      <div class="desktop-nav">
+        <a onclick="delayedNavigate('admin-home.html')" class="nav-link inactive">Home</a>
+        <a onclick="delayedNavigate('admin-gallery.html')" class="nav-link inactive">Gallery & CMS</a>
+        <a onclick="delayedNavigate('admin-bookings.html')" class="nav-link active">Bookings</a>
+        <a onclick="delayedNavigate('admin-settings.html')" class="nav-link inactive">Settings</a>
+      </div>
+      <div class="nav-actions">
+        <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light/Dark Theme">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+        <button id="mobile-menu-btn" class="hamburger-btn" aria-label="Toggle Navigation">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:1.75rem; height:1.75rem; color:var(--accent-gold)">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <div id="mobile-menu" class="mobile-drawer">
+      <a onclick="delayedNavigate('admin-home.html')" class="mobile-link inactive">Home</a>
+      <a onclick="delayedNavigate('admin-gallery.html')" class="mobile-link inactive">Gallery & CMS</a>
+      <a onclick="delayedNavigate('admin-bookings.html')" class="mobile-link active">Bookings</a>
+      <a onclick="delayedNavigate('admin-settings.html')" class="mobile-link inactive">Settings</a>
+    </div>
+
+    <main>
+      <!-- 1. Dynamic Package Management (Clean start) -->
+      <section class="admin-card">
+        <h2 class="admin-card-header"><i class="fa-solid fa-box"></i> Upload / Manage Studio Packages</h2>
+        <form id="pkgForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Shoot Name</label>
+              <input type="text" id="pkgName" placeholder="e.g. Luxury Editorial" required />
+            </div>
+            <div class="form-group">
+              <label>Price (₦)</label>
+              <input type="number" id="pkgPrice" placeholder="50000" required />
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" id="pkgLocation" placeholder="Studio Location" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="pkgDesc" placeholder="Package deliverables..."></textarea>
+          </div>
+          <button type="submit" class="btn-gold" style="margin-top:0.5rem;">Publish Package to Client Side</button>
+        </form>
+
+        <h3 style="font-size: 1rem; color: var(--accent-gold); margin: 2rem 0 1rem 0;">Active Packages</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Price</th><th>Location</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="adminPackagesBody">
+              <tr><td colspan="4" style="text-align:center; color:var(--text-muted)">No packages uploaded yet. Clean state.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 2. Manual Booking Entry -->
+      <section class="admin-card">
+        <h2 class="admin-card-header"><i class="fa-solid fa-address-book"></i> Record Manual Booking (WhatsApp / Offline)</h2>
+        <form id="manualBookingForm" class="form-grid">
+          <div class="form-group">
+            <label>Client Name</label>
+            <input type="text" id="manName" placeholder="Client Name" required />
+          </div>
+          <div class="form-group">
+            <label>WhatsApp Number</label>
+            <input type="text" id="manPhone" placeholder="08130000000" required />
+          </div>
+          <div class="form-group">
+            <label>Package Title</label>
+            <input type="text" id="manPackage" placeholder="Custom Session" required />
+          </div>
+          <div class="form-group">
+            <label>Amount (₦)</label>
+            <input type="number" id="manAmount" placeholder="30000" required />
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1; margin-top:0.5rem;">
+            <button type="submit" class="btn-gold">Create & Confirm Manual Session</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 3. Incoming Bookings & Verification Control -->
+      <section class="admin-card">
+        <h2 class="admin-card-header"><i class="fa-solid fa-clipboard-check"></i> Incoming Bookings & Status Control</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Session ID</th><th>Client Name</th><th>WhatsApp</th><th>Package</th><th>Payment Verified</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminBookingsBody">
+              <tr><td colspan="7" style="text-align:center; color:var(--text-muted)">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. Transaction History Log -->
+      <section class="admin-card">
+        <h2 class="admin-card-header"><i class="fa-solid fa-receipt"></i> Transaction History Log</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Session ID</th><th>Client Name</th><th>Amount</th><th>Paystack Ref</th></tr>
+            </thead>
+            <tbody id="transactionLogBody">
+              <tr><td colspan="5" style="text-align:center; color:var(--text-muted)">No transactions recorded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // Navigation Delay
+      function delayedNavigate(url) {
+        document.getElementById("nav-loading-overlay").classList.add("active");
+        setTimeout(() => { window.location.href = url; }, 400);
+      }
+      const menuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+      menuBtn.addEventListener("click", () => mobileMenu.classList.toggle("open"));
+
+      // Theme Engine
+      const themeBtn = document.getElementById("themeToggleBtn");
+      const themeIcon = document.getElementById("themeIcon");
+      function applyTheme(theme) {
+        if (theme === "light") {
+          document.documentElement.setAttribute("data-theme", "light");
+          themeIcon.className = "fa-solid fa-sun";
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+          themeIcon.className = "fa-solid fa-moon";
+        }
+      }
+      applyTheme(localStorage.getItem("px_theme") || "dark");
+      themeBtn.addEventListener("click", () => {
+        const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+        localStorage.setItem("px_theme", next);
+        applyTheme(next);
+      });
+
+      const SUPABASE_URL = "https://kplwvidpctgjwkxsabov.supabase.co";
+      const SUPABASE_ANON_KEY = "sb_publishable_ggIovP3ZABeeHr-kIyUy7g_f_Vcy_4k";
+      const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+      // 1. Package Uploader
+      document.getElementById("pkgForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("pkgName").value.trim();
+        const price = parseFloat(document.getElementById("pkgPrice").value);
+        const location = document.getElementById("pkgLocation").value.trim();
+        const description = document.getElementById("pkgDesc").value.trim();
+
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from("studio_packages").insert([{ name, price, location, description }]);
+          if (!error) {
+            alert("Package uploaded live to client side!");
+            e.target.reset();
+            loadAdminPackages();
+          } else {
+            alert("Error: " + error.message);
+          }
+        }
+      });
+
+      async function loadAdminPackages() {
+        if (!supabaseClient) return;
+        const { data: pkgs } = await supabaseClient.from("studio_packages").select("*").order("created_at", { ascending: false });
+        const tbody = document.getElementById("adminPackagesBody");
+
+        if (!pkgs || pkgs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted)">No packages uploaded yet. Clean state.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = pkgs.map(p => `
+          <tr>
+            <td style="font-weight:700">${escapeHtml(p.name)}</td>
+            <td>₦${Number(p.price).toLocaleString()}</td>
+            <td>${escapeHtml(p.location)}</td>
+            <td><button class="btn-danger" onclick="deletePackage('${p.id}')">Delete</button></td>
+          </tr>
+        `).join("");
+      }
+
+      async function deletePackage(id) {
+        if (!confirm("Remove this package completely?")) return;
+        if (supabaseClient) {
+          await supabaseClient.from("studio_packages").delete().eq("id", id);
+          loadAdminPackages();
+        }
+      }
+
+      // 2. Manual Booking
+      document.getElementById("manualBookingForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("manName").value.trim();
+        const phone = document.getElementById("manPhone").value.trim();
+        const pkg = document.getElementById("manPackage").value.trim();
+        const amount = parseFloat(document.getElementById("manAmount").value);
+        const sessionCode = "PX-MAN-" + Math.floor(100000 + Math.random() * 900000);
+
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from("client_bookings").insert([{
+            session_id: sessionCode,
+            client_name: name,
+            whatsapp_number: phone,
+            package_name: pkg,
+            amount: amount,
+            status: "Confirmed",
+            verified: true
+          }]);
+
+          if (!error) {
+            alert("Manual booking created successfully!");
+            e.target.reset();
+            loadAdminBookings();
+          } else {
+            alert("Error: " + error.message);
+          }
+        }
+      });
+
+      // 3. Load Bookings & Transaction Logs
+      async function loadAdminBookings() {
+        if (!supabaseClient) return;
+        const { data: bookings } = await supabaseClient.from("client_bookings").select("*").order("created_at", { ascending: false });
+        const tbody = document.getElementById("adminBookingsBody");
+        const logBody = document.getElementById("transactionLogBody");
+
+        if (!bookings || bookings.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted)">No bookings registered yet.</td></tr>`;
+          logBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">No transactions recorded.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = bookings.map(b => {
+          const verBadge = b.verified ? `<span class="badge-green">🟢 Verified Passed</span>` : `<span class="badge-red">🔴 Not Passed</span>`;
+          const isCompleted = b.status === "Completed";
+          const actionBtn = isCompleted ? `<span style="color:var(--accent-gold); font-weight:700">Completed</span>` : `<button class="btn-success" onclick="markCompleted('${b.id}')">Mark Confirmed</button>`;
+
+          return `
+            <tr>
+              <td style="font-weight:700">${b.session_id}</td>
+              <td>${escapeHtml(b.client_name)}</td>
+              <td>${escapeHtml(b.whatsapp_number || 'N/A')}</td>
+              <td>${escapeHtml(b.package_name)}</td>
+              <td>${verBadge}</td>
+              <td>${escapeHtml(b.status)}</td>
+              <td>${actionBtn}</td>
+            </tr>
+          `;
+        }).join("");
+
+        logBody.innerHTML = bookings.map(b => `
+          <tr>
+            <td>${new Date(b.created_at).toLocaleDateString()}</td>
+            <td style="font-weight:700">${b.session_id}</td>
+            <td>${escapeHtml(b.client_name)}</td>
+            <td>₦${Number(b.amount).toLocaleString()}</td>
+            <td>${escapeHtml(b.payment_ref || 'N/A (Manual)')}</td>
+          </tr>
+        `).join("");
+      }
+
+      async function markCompleted(id) {
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from("client_bookings").update({ status: "Completed" }).eq("id", id);
+          if (!error) {
+            alert("Marked as Completed! Success notice triggered on client side.");
+            loadAdminBookings();
+          }
+        }
+      }
+
+      function escapeHtml(str) {
+        return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadAdminPackages();
+        loadAdminBookings();
+      });
+    </script>
+  </body>
+</html>

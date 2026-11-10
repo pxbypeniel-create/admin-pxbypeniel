@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Settings | PXByPeniel</title>
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+      :root {
+        --bg-main: #0a0a0a;
+        --bg-card: #141414;
+        --bg-input: #1f1f1f;
+        --border-color: #262626;
+        --accent-gold: #d4af37;
+        --accent-gold-hover: #e5be3e;
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+        --danger-red: #ef4444;
+        --danger-bg: rgba(239, 68, 68, 0.15);
+        --status-green: #10b981;
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      [data-theme="light"] {
+        --bg-main: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-input: #f1f5f9;
+        --border-color: #e2e8f0;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --danger-red: #dc2626;
+        --danger-bg: rgba(220, 38, 38, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        min-height: 100vh;
+        padding-bottom: 5rem;
+      }
+
+      /* Navbar */
+      .navbar {
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 0.875rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .brand-logo {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.125rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .brand-logo span {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .desktop-nav {
+        display: none;
+        gap: 2rem;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .nav-link.active {
+        color: var(--accent-gold);
+        border-bottom: 2px solid var(--accent-gold);
+      }
+
+      .nav-link.inactive {
+        color: var(--text-muted);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .theme-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .hamburger-btn {
+        background: none;
+        border: none;
+        color: var(--accent-gold);
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+      }
+
+      .mobile-drawer {
+        display: none;
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        text-align: center;
+      }
+
+      .mobile-drawer.open {
+        display: block;
+      }
+
+      .mobile-drawer .mobile-link {
+        display: block;
+        padding: 0.75rem 0;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      @media (min-width: 768px) {
+        .desktop-nav {
+          display: flex;
+        }
+        .hamburger-btn {
+          display: none;
+        }
+        .mobile-drawer {
+          display: none !important;
+        }
+      }
+
+      main {
+        max-width: 68rem;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .admin-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      }
+
+      .admin-card-header {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      input,
+      select {
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        outline: none;
+        font-family: inherit;
+        font-size: 0.875rem;
+      }
+
+      input[type="file"] {
+        padding: 0.5rem;
+        cursor: pointer;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: var(--accent-gold);
+      }
+
+      .btn-gold {
+        background-color: var(--accent-gold);
+        color: #000;
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn-gold:hover {
+        background-color: var(--accent-gold-hover);
+      }
+
+      .btn-danger-outline {
+        background-color: var(--danger-bg);
+        color: var(--danger-red);
+        border: 1px solid var(--danger-red);
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-danger-outline:hover {
+        background-color: var(--danger-red);
+        color: #fff;
+      }
+
+      /* Profile Avatar Preview */
+      .avatar-preview-container {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .settings-avatar-circle {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        background-color: var(--bg-input);
+        border: 2px solid var(--accent-gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--accent-gold);
+        overflow: hidden;
+      }
+
+      .settings-avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* Loading Overlay */
+      #nav-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-gold);
+      }
+      #nav-loading-overlay.active {
+        display: flex;
+      }
+      .spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid rgba(212, 175, 55, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent-gold);
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1rem;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Page Transition Overlay -->
+    <div id="nav-loading-overlay">
+      <div class="spinner"></div>
+      <p style="font-size: 0.875rem; font-weight: 600">Processing request...</p>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <a onclick="delayedNavigate('admin-home.html')" class="brand-logo">
+        PxByPeniel <span>[ADMIN]</span>
+      </a>
+      <div class="desktop-nav">
+        <a
+          onclick="delayedNavigate('admin-home.html')"
+          class="nav-link inactive"
+          >Home</a
+        >
+        <a
+          onclick="delayedNavigate('admin-gallery.html')"
+          class="nav-link inactive"
+          >Gallery & CMS</a
+        >
+        <a
+          onclick="delayedNavigate('admin-bookings.html')"
+          class="nav-link inactive"
+          >Bookings</a
+        >
+        <a
+          onclick="delayedNavigate('admin-settings.html')"
+          class="nav-link active"
+          >Settings</a
+        >
+      </div>
+      <div class="nav-actions">
+        <button
+          id="themeToggleBtn"
+          class="theme-toggle-btn"
+          title="Toggle Light/Dark Theme"
+        >
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+        <button
+          id="mobile-menu-btn"
+          class="hamburger-btn"
+          aria-label="Toggle Navigation"
+        >
+          <svg
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            style="width: 1.75rem; height: 1.75rem; color: var(--accent-gold)"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="mobile-drawer">
+      <a
+        onclick="delayedNavigate('admin-home.html')"
+        class="mobile-link inactive"
+        >Home</a
+      >
+      <a
+        onclick="delayedNavigate('admin-gallery.html')"
+        class="mobile-link inactive"
+        >Gallery & CMS</a
+      >
+      <a
+        onclick="delayedNavigate('admin-bookings.html')"
+        class="mobile-link inactive"
+        >Bookings</a
+      >
+      <a
+        onclick="delayedNavigate('admin-settings.html')"
+        class="mobile-link active"
+        >Settings</a
+      >
+    </div>
+
+    <main>
+      <!-- 1. Admin Display Name & Phone Storage Avatar Upload -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-user-gear"></i> Admin Account Details & Avatar
+        </h2>
+
+        <div class="avatar-preview-container">
+          <div class="settings-avatar-circle" id="settingsAvatarPreview">A</div>
+          <div>
+            <p style="font-weight: 600; font-size: 0.9rem">
+              Profile Avatar Badge
+            </p>
+            <p style="font-size: 0.78rem; color: var(--text-muted)">
+              Upload a picture straight from your phone or device storage.
+            </p>
+          </div>
+        </div>
+
+        <form id="adminProfileForm" class="form-grid">
+          <div class="form-group">
+            <label>Admin Display Name</label>
+            <input
+              type="text"
+              id="adminDisplayName"
+              placeholder="e.g. PXByPeniel"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Upload Profile Picture from Device</label>
+            <input type="file" id="adminAvatarFile" accept="image/*" />
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1">
+            <label>Admin Email</label>
+            <input
+              type="email"
+              id="adminDisplayEmail"
+              placeholder="admin@pxbypeniel.com"
+              readonly
+              style="opacity: 0.7; cursor: not-allowed"
+            />
+          </div>
+          <div
+            class="form-group"
+            style="grid-column: 1 / -1; margin-top: 0.5rem"
+          >
+            <button type="submit" class="btn-gold">
+              <i class="fa-solid fa-floppy-disk"></i> Update Profile & Avatar in
+              Supabase
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 2. Security & Password Update -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-key"></i> Update Security Credentials
+        </h2>
+        <form id="updatePasswordForm" class="form-grid">
+          <div class="form-group">
+            <label>New Private Password</label>
+            <input
+              type="password"
+              id="newPassword"
+              placeholder="Minimum 6 characters"
+              minlength="6"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              placeholder="Re-enter new password"
+              minlength="6"
+              required
+            />
+          </div>
+          <div
+            class="form-group"
+            style="grid-column: 1 / -1; margin-top: 0.5rem"
+          >
+            <button type="submit" class="btn-gold">
+              <i class="fa-solid fa-shield-halved"></i> Update Password in
+              Supabase
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 3. Appearance & Theme Selection Control -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-palette"></i> Display Theme Preference
+        </h2>
+        <form id="themePreferenceForm" class="form-grid">
+          <div class="form-group">
+            <label>Interface Theme Mode</label>
+            <select id="themeSelectDropdown">
+              <option value="system">System Default</option>
+              <option value="dark">Dark Mode</option>
+              <option value="light">Light Mode</option>
+            </select>
+          </div>
+          <div
+            class="form-group"
+            style="grid-column: 1 / -1; margin-top: 0.5rem"
+          >
+            <button type="submit" class="btn-gold">
+              <i class="fa-solid fa-circle-half-stroke"></i> Save Theme
+              Preference
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 4. Session Termination & Sign Out -->
+      <section class="admin-card">
+        <h2
+          class="admin-card-header"
+          style="color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3)"
+        >
+          <i class="fa-solid fa-right-from-bracket"></i> Master Session Control
+        </h2>
+        <p
+          style="
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+          "
+        >
+          Signing out will safely clear your local session identity and lock
+          subfolder access. You will be redirected back to the root login portal
+          (`../index.html`).
+        </p>
+        <div>
+          <button class="btn-danger-outline" onclick="handleAdminSignOut()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out of
+            Admin Portal
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // Navigation Delay & Mobile Menu
+      function delayedNavigate(url) {
+        document.getElementById("nav-loading-overlay").classList.add("active");
+        setTimeout(() => {
+          window.location.href = url;
+        }, 400);
+      }
+
+      const menuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+      menuBtn.addEventListener("click", () =>
+        mobileMenu.classList.toggle("open"),
+      );
+
+      // Theme Engine
+      const themeBtn = document.getElementById("themeToggleBtn");
+      const themeIcon = document.getElementById("themeIcon");
+
+      function applyTheme(theme) {
+        if (theme === "light") {
+          document.documentElement.setAttribute("data-theme", "light");
+          themeIcon.className = "fa-solid fa-sun";
+        } else if (theme === "dark") {
+          document.documentElement.removeAttribute("data-theme");
+          themeIcon.className = "fa-solid fa-moon";
+        } else {
+          if (
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: light)").matches
+          ) {
+            document.documentElement.setAttribute("data-theme", "light");
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+          }
+          themeIcon.className = "fa-solid fa-circle-half-stroke";
+        }
+      }
+
+      let currentTheme = localStorage.getItem("px_theme") || "system";
+      applyTheme(currentTheme);
+      document.getElementById("themeSelectDropdown").value = currentTheme;
+
+      themeBtn.addEventListener("click", () => {
+        if (currentTheme === "system") currentTheme = "light";
+        else if (currentTheme === "light") currentTheme = "dark";
+        else currentTheme = "system";
+
+        localStorage.setItem("px_theme", currentTheme);
+        document.getElementById("themeSelectDropdown").value = currentTheme;
+        applyTheme(currentTheme);
+      });
+
+      // Save Theme Preference
+      document
+        .getElementById("themePreferenceForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const selectedTheme = document.getElementById(
+            "themeSelectDropdown",
+          ).value;
+          currentTheme = selectedTheme;
+          localStorage.setItem("px_theme", selectedTheme);
+          applyTheme(selectedTheme);
+          alert("Display theme preference saved successfully!");
+        });
+
+      // Supabase Initialization
+      const SUPABASE_URL = "https://kplwvidpctgjwkxsabov.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "sb_publishable_ggIovP3ZABeeHr-kIyUy7g_f_Vcy_4k";
+      const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+      // Hydrate Admin Details & Avatar
+      async function initSettingsPage() {
+        let adminName = localStorage.getItem("px_admin_name") || "Master";
+        let adminEmail =
+          localStorage.getItem("px_admin_email") || "admin@pxbypeniel.com";
+        let adminAvatar = localStorage.getItem("px_admin_avatar") || "";
+
+        document.getElementById("adminDisplayName").value = adminName;
+        document.getElementById("adminDisplayEmail").value = adminEmail;
+
+        updateAvatarPreview(adminAvatar, adminName);
+
+        if (supabaseClient) {
+          const { data: sessionData } = await supabaseClient.auth.getSession();
+          if (sessionData?.session?.user) {
+            const user = sessionData.session.user;
+            document.getElementById("adminDisplayEmail").value =
+              user.email || adminEmail;
+
+            if (user.user_metadata?.full_name) {
+              adminName = user.user_metadata.full_name;
+              document.getElementById("adminDisplayName").value = adminName;
+              localStorage.setItem("px_admin_name", adminName);
+            }
+
+            if (user.user_metadata?.avatar_url) {
+              adminAvatar = user.user_metadata.avatar_url;
+              localStorage.setItem("px_admin_avatar", adminAvatar);
+            }
+            updateAvatarPreview(adminAvatar, adminName);
+          }
+        }
+      }
+
+      function updateAvatarPreview(url, name) {
+        const preview = document.getElementById("settingsAvatarPreview");
+        if (url) {
+          preview.innerHTML = `<img src="${url}" alt="Avatar" onerror="this.parentElement.innerHTML='${name.charAt(0).toUpperCase()}'" />`;
+        } else {
+          preview.textContent = name ? name.charAt(0).toUpperCase() : "A";
+        }
+      }
+
+      // Convert uploaded file from phone storage to Base64 string
+      function convertFileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+      }
+
+      // 1. Save Profile Display Name & Device Avatar File
+      document
+        .getElementById("adminProfileForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const updatedName = document
+            .getElementById("adminDisplayName")
+            .value.trim();
+          const fileInput = document.getElementById("adminAvatarFile");
+
+          let avatarDataUrl = localStorage.getItem("px_admin_avatar") || "";
+
+          if (fileInput.files && fileInput.files[0]) {
+            try {
+              avatarDataUrl = await convertFileToBase64(fileInput.files[0]);
+            } catch (err) {
+              alert("Error reading image file from storage.");
+              return;
+            }
+          }
+
+          if (supabaseClient) {
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.add("active");
+            const { error } = await supabaseClient.auth.updateUser({
+              data: { full_name: updatedName, avatar_url: avatarDataUrl },
+            });
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.remove("active");
+
+            if (error) {
+              alert("Failed to update profile in Supabase: " + error.message);
+              return;
+            }
+          }
+
+          localStorage.setItem("px_admin_name", updatedName);
+          localStorage.setItem("px_admin_avatar", avatarDataUrl);
+          updateAvatarPreview(avatarDataUrl, updatedName);
+
+          alert("Admin profile and avatar updated successfully!");
+        });
+
+      // 2. Update Password via Supabase Auth
+      document
+        .getElementById("updatePasswordForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const pass = document.getElementById("newPassword").value;
+          const confirmPass = document.getElementById("confirmPassword").value;
+
+          if (pass !== confirmPass) {
+            alert("Passwords do not match!");
+            return;
+          }
+
+          if (supabaseClient) {
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.add("active");
+            const { error } = await supabaseClient.auth.updateUser({
+              password: pass,
+            });
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.remove("active");
+
+            if (error) {
+              alert("Password Update Failed: " + error.message);
+            } else {
+              alert("Your password has been updated in Supabase successfully!");
+              e.target.reset();
+            }
+          }
+        });
+
+      // 3. Sign Out Handler
+      async function handleAdminSignOut() {
+        if (confirm("Are you sure you want to sign out?")) {
+          if (supabaseClient) {
+            await supabaseClient.auth.signOut();
+          }
+          localStorage.removeItem("px_admin_name");
+          localStorage.removeItem("px_admin_email");
+          localStorage.removeItem("px_admin_avatar");
+          delayedNavigate("../index.html");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", initSettingsPage);
+    </script>
+  </body>
+</html>

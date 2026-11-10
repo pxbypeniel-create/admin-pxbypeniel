@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PXByPeniel - Admin Login</title>
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+      :root {
+        --bg-main: #0a0a0a;
+        --bg-card: #141414;
+        --bg-input: #1f1f1f;
+        --border-color: #262626;
+        --accent-gold: #d4af37;
+        --accent-gold-hover: #e5be3e;
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      [data-theme="light"] {
+        --bg-main: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-input: #f1f5f9;
+        --border-color: #e2e8f0;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Navbar */
+      .top-nav {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      .theme-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .theme-toggle-btn:hover {
+        border-color: var(--accent-gold);
+      }
+
+      /* Login Container */
+      .login-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .login-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 2.5rem 2rem;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Circular Brand Logo Badge */
+      .brand-logo-circle {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        background-color: var(--bg-input);
+        border: 2px solid var(--accent-gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+      }
+
+      .brand-logo-circle img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+      }
+
+      .brand-title {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.35rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+      }
+
+      .brand-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 1.25rem;
+      }
+
+      label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 0.4rem;
+      }
+
+      input {
+        width: 100%;
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.85rem 1rem;
+        border-radius: 0.5rem;
+        outline: none;
+        font-size: 0.9rem;
+      }
+
+      input:focus {
+        border-color: var(--accent-gold);
+      }
+
+      .btn-gold {
+        background-color: var(--accent-gold);
+        color: #000;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0.875rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 1rem;
+        transition:
+          background-color 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .btn-gold:hover {
+        background-color: var(--accent-gold-hover);
+        transform: translateY(-1px);
+      }
+
+      /* Loading Overlay */
+      #nav-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-gold);
+      }
+      #nav-loading-overlay.active {
+        display: flex;
+      }
+      .spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid rgba(212, 175, 55, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent-gold);
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1rem;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Page Transition Overlay -->
+    <div id="nav-loading-overlay">
+      <div class="spinner"></div>
+      <p id="loadingText" style="font-size: 0.875rem; font-weight: 600">
+        Authenticating Admin...
+      </p>
+    </div>
+
+    <!-- Top Navigation Bar with Theme Toggle -->
+    <nav class="top-nav">
+      <button
+        id="themeToggleBtn"
+        class="theme-toggle-btn"
+        title="Toggle Light/Dark Theme"
+      >
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+    </nav>
+
+    <!-- Main Login View -->
+    <div class="login-container">
+      <div class="login-card">
+        <!-- Circular Brand Logo Badge -->
+        <div class="brand-logo-circle">
+          <img
+            src="images/logo.png"
+            alt="PXByPeniel Logo"
+            style="width: 150px; height: 100%; object-fit: contain"
+            onerror="
+              this.style.display = 'none';
+              this.nextElementSibling.hidden = false;
+            "
+          />
+        </div>
+
+        <h1 class="brand-title">PXBYPENIEL</h1>
+        <p class="brand-subtitle">Admin Portal</p>
+
+        <form id="adminLoginForm" style="width: 100%">
+          <div class="form-group">
+            <label for="adminEmail">Admin Email</label>
+            <input
+              type="email"
+              id="adminEmail"
+              placeholder="admin@pxbypeniel.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Password</label>
+            <input
+              type="password"
+              id="adminPassword"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button type="submit" class="btn-gold">Sign In to Dashboard</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      const SUPABASE_URL = "https://kplwvidpctgjwkxsabov.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "sb_publishable_ggIovP3ZABeeHr-kIyUy7g_f_Vcy_4k";
+      const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+      // Theme Engine
+      const themeBtn = document.getElementById("themeToggleBtn");
+      const themeIcon = document.getElementById("themeIcon");
+
+      function applyTheme(theme) {
+        if (theme === "light") {
+          document.documentElement.setAttribute("data-theme", "light");
+          themeIcon.className = "fa-solid fa-sun";
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+          themeIcon.className = "fa-solid fa-moon";
+        }
+      }
+
+      applyTheme(localStorage.getItem("px_theme") || "dark");
+
+      themeBtn.addEventListener("click", () => {
+        const next =
+          document.documentElement.getAttribute("data-theme") === "light"
+            ? "dark"
+            : "light";
+        localStorage.setItem("px_theme", next);
+        applyTheme(next);
+      });
+
+      // 1. Check existing session
+      async function checkExistingSession() {
+        if (!supabaseClient) return;
+
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        if (sessionData?.session) {
+          document.getElementById("loadingText").textContent =
+            "Session active. Redirecting to portal...";
+          document
+            .getElementById("nav-loading-overlay")
+            .classList.add("active");
+          setTimeout(() => {
+            window.location.href = "admin portal/admin-home.html";
+          }, 400);
+        }
+      }
+
+      // 2. Handle Login
+      document
+        .getElementById("adminLoginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("adminEmail").value.trim();
+          const password = document.getElementById("adminPassword").value;
+
+          if (!supabaseClient) {
+            alert("Supabase client not initialized.");
+            return;
+          }
+
+          document.getElementById("loadingText").textContent =
+            "Authenticating Admin...";
+          document
+            .getElementById("nav-loading-overlay")
+            .classList.add("active");
+
+          const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) {
+            document
+              .getElementById("nav-loading-overlay")
+              .classList.remove("active");
+            alert("Admin Login Failed: " + error.message);
+            return;
+          }
+
+          if (data?.session) {
+            const user = data.session.user;
+            const userMetaName = user.user_metadata?.full_name;
+            const adminName = userMetaName || user.email.split("@")[0];
+
+            localStorage.setItem("px_admin_name", adminName);
+            localStorage.setItem("px_admin_email", user.email);
+
+            setTimeout(() => {
+              window.location.href = "admin portal/admin-home.html";
+            }, 400);
+          }
+        });
+
+      document.addEventListener("DOMContentLoaded", checkExistingSession);
+    </script>
+  </body>
+</html>

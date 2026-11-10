@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Home Dashboard | PXByPeniel</title>
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+      :root {
+        --bg-main: #0a0a0a;
+        --bg-card: #141414;
+        --bg-input: #1f1f1f;
+        --border-color: #262626;
+        --accent-gold: #d4af37;
+        --accent-gold-hover: #e5be3e;
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+        --danger-red: #ef4444;
+        --danger-bg: rgba(239, 68, 68, 0.15);
+        --status-green: #10b981;
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      [data-theme="light"] {
+        --bg-main: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-input: #f1f5f9;
+        --border-color: #e2e8f0;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --danger-red: #dc2626;
+        --danger-bg: rgba(220, 38, 38, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        min-height: 100vh;
+        padding-bottom: 5rem;
+      }
+
+      /* Navbar */
+      .navbar {
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 0.875rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .brand-logo {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.125rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .brand-logo span {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .desktop-nav {
+        display: none;
+        gap: 2rem;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .nav-link.active {
+        color: var(--accent-gold);
+        border-bottom: 2px solid var(--accent-gold);
+      }
+
+      .nav-link.inactive {
+        color: var(--text-muted);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .theme-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .hamburger-btn {
+        background: none;
+        border: none;
+        color: var(--accent-gold);
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+      }
+
+      .mobile-drawer {
+        display: none;
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        text-align: center;
+      }
+
+      .mobile-drawer.open {
+        display: block;
+      }
+
+      .mobile-drawer .mobile-link {
+        display: block;
+        padding: 0.75rem 0;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      @media (min-width: 768px) {
+        .desktop-nav {
+          display: flex;
+        }
+        .hamburger-btn {
+          display: none;
+        }
+        .mobile-drawer {
+          display: none !important;
+        }
+      }
+
+      main {
+        max-width: 68rem;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+
+      .admin-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      }
+
+      .admin-card-header {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      /* Admin Profile Banner */
+      .admin-welcome-banner {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 2.5rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.25rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      }
+
+      .admin-avatar-circle {
+        width: 6.5rem;
+        height: 6.5rem;
+        border-radius: 50%;
+        background-color: var(--bg-input);
+        border: 3px solid var(--accent-gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--accent-gold);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .admin-id-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      .copy-btn {
+        background: none;
+        border: none;
+        color: var(--accent-gold);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.8rem;
+      }
+
+      .copy-btn:hover {
+        text-decoration: underline;
+      }
+
+      /* Metrics Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .stat-card {
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: var(--accent-gold);
+        margin-top: 0.35rem;
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      /* Bar Chart Styling */
+      .graph-container {
+        height: 220px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 1rem 0 0 0;
+        gap: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .bar-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        height: 100%;
+        justify-content: flex-end;
+      }
+
+      .bar {
+        width: 100%;
+        max-width: 42px;
+        background: linear-gradient(
+          to top,
+          var(--accent-gold),
+          var(--accent-gold-hover)
+        );
+        border-radius: 4px 4px 0 0;
+        transition: height 0.5s ease;
+      }
+
+      .bar-label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      /* Table Container */
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        text-align: left;
+      }
+
+      th,
+      td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      th {
+        color: var(--accent-gold);
+      }
+
+      .badge-green {
+        color: var(--status-green);
+        font-weight: 700;
+      }
+      .badge-pending {
+        color: #eab308;
+        font-weight: 700;
+      }
+
+      /* Loading Overlay */
+      #nav-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-gold);
+      }
+      #nav-loading-overlay.active {
+        display: flex;
+      }
+      .spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid rgba(212, 175, 55, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent-gold);
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1rem;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Page Transition Overlay -->
+    <div id="nav-loading-overlay">
+      <div class="spinner"></div>
+      <p style="font-size: 0.875rem; font-weight: 600">Loading section...</p>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <a onclick="delayedNavigate('admin-home.html')" class="brand-logo">
+        PxByPeniel <span>[ADMIN]</span>
+      </a>
+      <div class="desktop-nav">
+        <a onclick="delayedNavigate('admin-home.html')" class="nav-link active"
+          >Home</a
+        >
+        <a
+          onclick="delayedNavigate('admin-gallery.html')"
+          class="nav-link inactive"
+          >Gallery & CMS</a
+        >
+        <a
+          onclick="delayedNavigate('admin-bookings.html')"
+          class="nav-link inactive"
+          >Bookings</a
+        >
+        <a
+          onclick="delayedNavigate('admin-settings.html')"
+          class="nav-link inactive"
+          >Settings</a
+        >
+      </div>
+      <div class="nav-actions">
+        <button
+          id="themeToggleBtn"
+          class="theme-toggle-btn"
+          title="Toggle Light/Dark Theme"
+        >
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+        <button
+          id="mobile-menu-btn"
+          class="hamburger-btn"
+          aria-label="Toggle Navigation"
+        >
+          <svg
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            style="width: 1.75rem; height: 1.75rem; color: var(--accent-gold)"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="mobile-drawer">
+      <a onclick="delayedNavigate('admin-home.html')" class="mobile-link active"
+        >Home</a
+      >
+      <a
+        onclick="delayedNavigate('admin-gallery.html')"
+        class="mobile-link inactive"
+        >Gallery & CMS</a
+      >
+      <a
+        onclick="delayedNavigate('admin-bookings.html')"
+        class="mobile-link inactive"
+        >Bookings</a
+      >
+      <a
+        onclick="delayedNavigate('admin-settings.html')"
+        class="mobile-link inactive"
+        >Settings</a
+      >
+    </div>
+
+    <!-- Main Content Container -->
+    <main>
+      <!-- 1. Central Admin Welcome & Profile Banner -->
+      <section class="admin-welcome-banner">
+        <div class="admin-avatar-circle" id="adminAvatarInitial">A</div>
+        <div>
+          <h1
+            id="adminWelcomeTitle"
+            style="
+              font-size: 1.6rem;
+              font-weight: 700;
+              color: var(--accent-gold);
+            "
+          >
+            Welcome, Admin
+          </h1>
+          <p
+            style="
+              font-size: 0.875rem;
+              color: var(--text-muted);
+              margin-top: 0.25rem;
+            "
+          >
+            PXByPeniel Studio Master Management Dashboard
+          </p>
+        </div>
+        <div class="admin-id-badge">
+          <span
+            >Admin ID:
+            <strong id="adminIdCode" style="color: var(--text-main)"
+              >PX-ADM-78492</strong
+            ></span
+          >
+          <button class="copy-btn" onclick="copyAdminId()">Copy ID</button>
+        </div>
+      </section>
+
+      <!-- 2. High-Level Metrics Counters -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Bookings</div>
+          <div class="stat-value" id="statTotalBookings">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Gross Revenue</div>
+          <div class="stat-value" id="statRevenue">₦0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Verifications</div>
+          <div class="stat-value" id="statPending">0</div>
+        </div>
+      </section>
+
+      <!-- 3. Studio Revenue Graph & Analytics -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-chart-line"></i> Revenue & Session Volume
+          Metrics
+        </h2>
+        <div class="graph-container" id="revenueGraph">
+          <div class="bar-group">
+            <div class="bar" style="height: 35%"></div>
+            <span class="bar-label">Mon</span>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height: 60%"></div>
+            <span class="bar-label">Tue</span>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height: 45%"></div>
+            <span class="bar-label">Wed</span>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height: 80%"></div>
+            <span class="bar-label">Thu</span>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height: 95%"></div>
+            <span class="bar-label">Fri</span>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height: 70%"></div>
+            <span class="bar-label">Sat</span>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height: 55%"></div>
+            <span class="bar-label">Sun</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Recent Bookings Feed -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-list-check"></i> Recent Client Bookings
+        </h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Client Name</th>
+                <th>Package</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminRecentBookingsBody">
+              <tr>
+                <td
+                  colspan="5"
+                  style="text-align: center; color: var(--text-muted)"
+                >
+                  Loading recent bookings...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // 1. Navigation Delay
+      function delayedNavigate(url) {
+        document.getElementById("nav-loading-overlay").classList.add("active");
+        setTimeout(() => {
+          window.location.href = url;
+        }, 400);
+      }
+
+      const menuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+      menuBtn.addEventListener("click", () =>
+        mobileMenu.classList.toggle("open"),
+      );
+
+      // 2. Theme Engine (Synced with admin-bookings.html)
+      const themeBtn = document.getElementById("themeToggleBtn");
+      const themeIcon = document.getElementById("themeIcon");
+
+      function applyTheme(theme) {
+        if (theme === "light") {
+          document.documentElement.setAttribute("data-theme", "light");
+          themeIcon.className = "fa-solid fa-sun";
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+          themeIcon.className = "fa-solid fa-moon";
+        }
+      }
+
+      applyTheme(localStorage.getItem("px_theme") || "dark");
+
+      themeBtn.addEventListener("click", () => {
+        const next =
+          document.documentElement.getAttribute("data-theme") === "light"
+            ? "dark"
+            : "light";
+        localStorage.setItem("px_theme", next);
+        applyTheme(next);
+      });
+
+      // 3. Admin ID Copy Tool
+      function copyAdminId() {
+        const idText = document.getElementById("adminIdCode").textContent;
+        navigator.clipboard.writeText(idText).then(() => {
+          alert("Admin ID copied to clipboard: " + idText);
+        });
+      }
+
+      // 4. Supabase Setup & Realtime Data Hydration
+      const SUPABASE_URL = "https://kplwvidpctgjwkxsabov.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "sb_publishable_ggIovP3ZABeeHr-kIyUy7g_f_Vcy_4k";
+      const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+      async function loadAdminDashboard() {
+        let adminName =
+          localStorage.getItem("px_admin_name") ||
+          localStorage.getItem("px_user_name") ||
+          "Master";
+        adminName = adminName.charAt(0).toUpperCase() + adminName.slice(1);
+        document.getElementById("adminWelcomeTitle").textContent =
+          `Welcome, ${adminName} Admin`;
+        document.getElementById("adminAvatarInitial").textContent = adminName
+          .charAt(0)
+          .toUpperCase();
+
+        if (!supabaseClient) return;
+
+        const { data: bookings, error } = await supabaseClient
+          .from("client_bookings")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error || !bookings) return;
+
+        document.getElementById("statTotalBookings").textContent =
+          bookings.length;
+
+        const totalRev = bookings.reduce(
+          (acc, b) => acc + (b.verified ? Number(b.amount || 0) : 0),
+          0,
+        );
+        document.getElementById("statRevenue").textContent =
+          "₦" + totalRev.toLocaleString();
+
+        const pendingCount = bookings.filter((b) => !b.verified).length;
+        document.getElementById("statPending").textContent = pendingCount;
+
+        const tbody = document.getElementById("adminRecentBookingsBody");
+        if (bookings.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted)">No bookings recorded yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = bookings
+          .slice(0, 5)
+          .map((b) => {
+            const statusBadge =
+              b.status === "Completed"
+                ? `<span class="badge-green">Completed</span>`
+                : `<span class="badge-pending">${b.status || "Pending"}</span>`;
+            return `
+            <tr>
+              <td style="font-weight: 700;">${b.session_id}</td>
+              <td>${escapeHtml(b.client_name)}</td>
+              <td>${escapeHtml(b.package_name)}</td>
+              <td>₦${Number(b.amount).toLocaleString()}</td>
+              <td>${statusBadge}</td>
+            </tr>
+          `;
+          })
+          .join("");
+      }
+
+      function escapeHtml(str) {
+        return str
+          ? str
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+          : "";
+      }
+
+      document.addEventListener("DOMContentLoaded", loadAdminDashboard);
+    </script>
+  </body>
+</html>

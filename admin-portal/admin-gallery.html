@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Gallery & CMS | PXByPeniel Photography</title>
+
+    <!-- FontAwesome 6 for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+      /* ==========================================================================
+       CSS THEME VARIABLES (Dark & Light Mode Engine)
+       ========================================================================== */
+      :root {
+        --bg-main: #0a0a0a;
+        --bg-card: #141414;
+        --bg-input: #1f1f1f;
+        --border-color: #262626;
+        --accent-gold: #d4af37;
+        --accent-gold-hover: #e5be3e;
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+        --nav-bg: rgba(20, 20, 20, 0.9);
+        --danger-red: #ef4444;
+        --danger-bg: rgba(239, 68, 68, 0.15);
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      [data-theme="light"] {
+        --bg-main: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-input: #f1f5f9;
+        --border-color: #e2e8f0;
+        --border-hover: #d4af37;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --nav-bg: rgba(255, 255, 255, 0.9);
+        --danger-red: #dc2626;
+        --danger-bg: rgba(220, 38, 38, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        min-height: 100vh;
+        line-height: 1.5;
+        padding-bottom: 5rem;
+      }
+
+      ::selection {
+        background-color: var(--accent-gold);
+        color: #000000;
+      }
+
+      /* ==========================================================================
+       TOP NAVIGATION BAR & MOBILE DRAWER
+       ========================================================================== */
+      .navbar {
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 0.875rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .brand-logo {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.125rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+      }
+
+      .brand-logo span {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .desktop-nav {
+        display: none;
+        gap: 2rem;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        padding-bottom: 0.25rem;
+        transition: color 0.2s ease;
+        cursor: pointer;
+      }
+
+      .nav-link.active {
+        color: var(--accent-gold);
+        border-bottom: 2px solid var(--accent-gold);
+      }
+
+      .nav-link.inactive {
+        color: var(--text-muted);
+      }
+
+      .nav-link.inactive:hover {
+        color: var(--accent-gold);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .theme-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.1rem;
+      }
+
+      .theme-toggle-btn:hover {
+        border-color: var(--accent-gold);
+        color: var(--accent-gold);
+      }
+
+      .hamburger-btn {
+        background: none;
+        border: none;
+        color: var(--accent-gold);
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hamburger-btn svg {
+        width: 1.75rem;
+        height: 1.75rem;
+      }
+
+      .mobile-drawer {
+        display: none;
+        background-color: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        text-align: center;
+      }
+
+      .mobile-drawer.open {
+        display: block;
+      }
+
+      .mobile-drawer .mobile-link {
+        display: block;
+        padding: 0.75rem 0;
+        font-size: 1rem;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .mobile-drawer .mobile-link.active {
+        color: var(--accent-gold);
+        font-weight: 700;
+      }
+
+      .mobile-drawer .mobile-link.inactive {
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .mobile-drawer .mobile-link.inactive:hover {
+        color: var(--accent-gold);
+      }
+
+      @media (min-width: 768px) {
+        .navbar {
+          padding: 1rem 2rem;
+        }
+        .brand-logo {
+          font-size: 1.25rem;
+        }
+        .desktop-nav {
+          display: flex;
+        }
+        .hamburger-btn {
+          display: none;
+        }
+        .mobile-drawer {
+          display: none !important;
+        }
+      }
+
+      /* ==========================================================================
+       MAIN CONTAINER & MANAGEMENT CARDS
+       ========================================================================== */
+      main {
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+
+      @media (min-width: 768px) {
+        main {
+          padding: 3rem 1.5rem;
+          gap: 3rem;
+        }
+      }
+
+      .admin-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      }
+
+      @media (min-width: 768px) {
+        .admin-card {
+          padding: 2.25rem;
+        }
+      }
+
+      .admin-card-header {
+        color: var(--accent-gold);
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.875rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      /* Form Layouts */
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+
+      @media (min-width: 640px) {
+        .form-grid-2 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .full-width {
+          grid-column: span 2;
+        }
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.25rem;
+      }
+
+      .form-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+      }
+
+      .form-input,
+      .form-select,
+      .form-textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        color: var(--text-main);
+        font-size: 0.875rem;
+        font-family: inherit;
+      }
+
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent-gold);
+      }
+
+      .btn-gold {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        background-color: var(--accent-gold);
+        color: #000000;
+        font-weight: 700;
+        font-size: 0.875rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition:
+          background-color 0.2s ease,
+          transform 0.2s ease;
+        width: 100%;
+      }
+
+      @media (min-width: 480px) {
+        .btn-gold {
+          width: auto;
+        }
+      }
+
+      .btn-gold:hover {
+        background-color: var(--accent-gold-hover);
+        transform: translateY(-1px);
+      }
+
+      /* Management Grid Layouts */
+      .section-subtitle {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        margin-top: 2.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .manage-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .manage-item {
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: border-color 0.2s ease;
+      }
+
+      .manage-item:hover {
+        border-color: var(--accent-gold);
+      }
+
+      .manage-item img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+      }
+
+      .manage-item-info {
+        padding: 0.875rem;
+      }
+
+      .manage-item-info h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-main);
+      }
+
+      .manage-item-info span {
+        font-size: 0.75rem;
+        color: var(--accent-gold);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+
+      .btn-delete {
+        width: 100%;
+        background-color: var(--danger-bg);
+        color: var(--danger-red);
+        border: 1px solid var(--danger-red);
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        margin-top: 0.75rem;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .btn-delete:hover {
+        background-color: var(--danger-red);
+        color: #ffffff;
+      }
+
+      .empty-text {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        grid-column: 1 / -1;
+        font-style: italic;
+      }
+
+      /* Navigation Loading Overlay */
+      #nav-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-gold);
+      }
+      #nav-loading-overlay.active {
+        display: flex;
+      }
+      .spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid rgba(212, 175, 55, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent-gold);
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1rem;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation Delay Screen -->
+    <div id="nav-loading-overlay">
+      <div class="spinner"></div>
+      <p style="font-size: 0.875rem; font-weight: 600; letter-spacing: 0.05em">
+        Loading section...
+      </p>
+    </div>
+
+    <!-- Admin Navigation Bar -->
+    <nav class="navbar">
+      <a onclick="delayedNavigate('admin-home.html')" class="brand-logo">
+        PxByPeniel <span>[ADMIN]</span>
+      </a>
+
+      <div class="desktop-nav">
+        <a
+          onclick="delayedNavigate('admin-home.html')"
+          class="nav-link inactive"
+          >Home</a
+        >
+        <a
+          onclick="delayedNavigate('admin-gallery.html')"
+          class="nav-link active"
+          >Gallery & CMS</a
+        >
+        <a
+          onclick="delayedNavigate('admin-bookings.html')"
+          class="nav-link inactive"
+          >Bookings</a
+        >
+        <a
+          onclick="delayedNavigate('admin-settings.html')"
+          class="nav-link inactive"
+          >Settings</a
+        >
+      </div>
+
+      <div class="nav-actions">
+        <!-- Theme Switcher Button -->
+        <button
+          id="themeToggleBtn"
+          class="theme-toggle-btn"
+          title="Toggle Light/Dark Theme"
+        >
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+
+        <!-- Mobile Hamburger Button -->
+        <button
+          id="mobile-menu-btn"
+          class="hamburger-btn"
+          aria-label="Toggle Navigation Menu"
+        >
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Drawer Menu -->
+    <div id="mobile-menu" class="mobile-drawer">
+      <a
+        onclick="delayedNavigate('admin-home.html')"
+        class="mobile-link inactive"
+        >Home</a
+      >
+      <a
+        onclick="delayedNavigate('admin-gallery.html')"
+        class="mobile-link active"
+        >Gallery & CMS</a
+      >
+      <a
+        onclick="delayedNavigate('admin-bookings.html')"
+        class="mobile-link inactive"
+        >Bookings</a
+      >
+      <a
+        onclick="delayedNavigate('admin-settings.html')"
+        class="mobile-link inactive"
+        >Settings</a
+      >
+    </div>
+
+    <!-- Main Content Container -->
+    <main>
+      <!-- 1. Giant Screen / Hero Quote Manager -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-quote-left"></i> Giant Screen / Hero Quote
+          Manager
+        </h2>
+        <form id="spotlightForm">
+          <div class="form-group">
+            <label class="form-label" for="spotlightQuote"
+              >Hero Quote Text</label
+            >
+            <textarea
+              id="spotlightQuote"
+              class="form-textarea"
+              rows="3"
+              placeholder="Enter studio brand quote..."
+              required
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="spotlightSubtitle"
+              >Subtitle / Author (Optional)</label
+            >
+            <input
+              type="text"
+              id="spotlightSubtitle"
+              class="form-input"
+              placeholder="e.g. — PXByPeniel Photography"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="spotlightImage"
+              >Background Image File</label
+            >
+            <input
+              type="file"
+              id="spotlightImage"
+              class="form-input"
+              accept="image/*"
+              required
+            />
+          </div>
+          <button type="submit" class="btn-gold" id="spotlightBtn">
+            Update Giant Screen
+          </button>
+        </form>
+      </section>
+
+      <!-- 2. Portfolio Gallery Upload & Manager -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-image"></i> Upload Portfolio Photo
+        </h2>
+        <form id="galleryForm">
+          <div class="form-grid form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="photoTitle">Photo Title</label>
+              <input
+                type="text"
+                id="photoTitle"
+                class="form-input"
+                placeholder="e.g. Luxury Editorial Shoot"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="photoCategory">Category</label>
+              <select id="photoCategory" class="form-select" required>
+                <option value="portraits">Portraits</option>
+                <option value="weddings">Weddings</option>
+                <option value="fashion">Fashion</option>
+                <option value="commercial">Commercial</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="photoFile">Image File</label>
+              <input
+                type="file"
+                id="photoFile"
+                class="form-input"
+                accept="image/*"
+                required
+              />
+            </div>
+          </div>
+          <button type="submit" class="btn-gold" id="galleryBtn">
+            Publish Photo
+          </button>
+        </form>
+
+        <h3 class="section-subtitle">
+          <i class="fa-solid fa-images"></i> Active Gallery Photos
+        </h3>
+        <div class="manage-grid" id="adminGalleryGrid">
+          <!-- Dynamic gallery entries injected here -->
+        </div>
+      </section>
+
+      <!-- 3. Featured Models / Muses Manager -->
+      <section class="admin-card">
+        <h2 class="admin-card-header">
+          <i class="fa-solid fa-users"></i> Add Featured Model / Muse
+        </h2>
+        <form id="modelForm">
+          <div class="form-grid form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="modelName">Model Full Name</label>
+              <input
+                type="text"
+                id="modelName"
+                class="form-input"
+                placeholder="e.g. Alex Anthony"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modelPhoto"
+                >Model Portrait Photo</label
+              >
+              <input
+                type="file"
+                id="modelPhoto"
+                class="form-input"
+                accept="image/*"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modelInstagram"
+                >Instagram Profile Link</label
+              >
+              <input
+                type="url"
+                id="modelInstagram"
+                class="form-input"
+                placeholder="https://instagram.com/username"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modelTiktok"
+                >TikTok Profile Link</label
+              >
+              <input
+                type="url"
+                id="modelTiktok"
+                class="form-input"
+                placeholder="https://tiktok.com/@username"
+              />
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="modelWhatsapp"
+                >WhatsApp Direct Link</label
+              >
+              <input
+                type="url"
+                id="modelWhatsapp"
+                class="form-input"
+                placeholder="https://wa.me/234XXXXXXXXXX"
+              />
+            </div>
+          </div>
+          <button type="submit" class="btn-gold" id="modelBtn">
+            Save Model Profile
+          </button>
+        </form>
+
+        <h3 class="section-subtitle">
+          <i class="fa-solid fa-user-check"></i> Active Featured Models
+        </h3>
+        <div class="manage-grid" id="adminModelsGrid">
+          <!-- Dynamic model entries injected here -->
+        </div>
+      </section>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+      // -------------------------------------------------------------
+      // 1. NAVIGATION & MOBILE DRAWER LOGIC
+      // -------------------------------------------------------------
+      function delayedNavigate(targetUrl) {
+        const overlay = document.getElementById("nav-loading-overlay");
+        overlay.classList.add("active");
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 400);
+      }
+
+      const menuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+      menuBtn.addEventListener("click", () =>
+        mobileMenu.classList.toggle("open"),
+      );
+
+      // -------------------------------------------------------------
+      // 2. THEME ENGINE & TOGGLE FIX
+      // -------------------------------------------------------------
+      const themeBtn = document.getElementById("themeToggleBtn");
+      const themeIcon = document.getElementById("themeIcon");
+
+      function applyTheme(theme) {
+        if (theme === "light") {
+          document.documentElement.setAttribute("data-theme", "light");
+          themeIcon.className = "fa-solid fa-sun";
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+          themeIcon.className = "fa-solid fa-moon";
+        }
+      }
+
+      const savedTheme = localStorage.getItem("px_theme") || "dark";
+      applyTheme(savedTheme);
+
+      themeBtn.addEventListener("click", () => {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme") === "light"
+            ? "light"
+            : "dark";
+        const nextTheme = currentTheme === "light" ? "dark" : "light";
+        localStorage.setItem("px_theme", nextTheme);
+        applyTheme(nextTheme);
+      });
+
+      // -------------------------------------------------------------
+      // 3. CLOUDINARY & SUPABASE CONFIGURATION
+      // -------------------------------------------------------------
+      const CLOUDINARY_CLOUD_NAME = "t61dysui";
+      const CLOUDINARY_UPLOAD_PRESET = "pxbypeniel_uploads";
+
+      const SUPABASE_URL = "https://kplwvidpctgjwkxsabov.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "sb_publishable_ggIovP3ZABeeHr-kIyUy7g_f_Vcy_4k";
+      const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+      // Helper for direct Cloudinary uploads
+      async function uploadToCloudinary(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        formData.append("cloud_name", CLOUDINARY_CLOUD_NAME);
+
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+        const data = await res.json();
+        if (!data.secure_url)
+          throw new Error("Cloudinary image upload failed.");
+        return data.secure_url;
+      }
+
+      // -------------------------------------------------------------
+      // 4. GIANT SCREEN SPOTLIGHT MANAGER
+      // -------------------------------------------------------------
+      document
+        .getElementById("spotlightForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("spotlightBtn");
+          btn.innerText = "Updating...";
+
+          try {
+            const quote = document.getElementById("spotlightQuote").value;
+            const subtitle = document.getElementById("spotlightSubtitle").value;
+            const file = document.getElementById("spotlightImage").files[0];
+
+            const imageUrl = await uploadToCloudinary(file);
+
+            const { error } = await supabaseClient
+              .from("site_spotlight")
+              .insert([
+                {
+                  quote,
+                  subtitle,
+                  image_url: imageUrl,
+                },
+              ]);
+
+            if (error) throw error;
+            alert("Giant Screen Spotlight updated successfully!");
+            e.target.reset();
+          } catch (err) {
+            alert("Error: " + err.message);
+          } finally {
+            btn.innerText = "Update Giant Screen";
+          }
+        });
+
+      // -------------------------------------------------------------
+      // 5. PORTFOLIO GALLERY MANAGER
+      // -------------------------------------------------------------
+      document
+        .getElementById("galleryForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("galleryBtn");
+          btn.innerText = "Publishing...";
+
+          try {
+            const title = document.getElementById("photoTitle").value;
+            const category = document.getElementById("photoCategory").value;
+            const file = document.getElementById("photoFile").files[0];
+
+            const imageUrl = await uploadToCloudinary(file);
+
+            const { error } = await supabaseClient
+              .from("gallery_images")
+              .insert([
+                {
+                  title,
+                  category,
+                  image_url: imageUrl,
+                },
+              ]);
+
+            if (error) throw error;
+            alert("Photo published to gallery!");
+            e.target.reset();
+            fetchAdminGallery();
+          } catch (err) {
+            alert("Error: " + err.message);
+          } finally {
+            btn.innerText = "Publish Photo";
+          }
+        });
+
+      async function fetchAdminGallery() {
+        if (!supabaseClient) return;
+        const { data: images } = await supabaseClient
+          .from("gallery_images")
+          .select("*")
+          .order("created_at", { ascending: false });
+        const grid = document.getElementById("adminGalleryGrid");
+
+        if (!images || images.length === 0) {
+          grid.innerHTML = '<p class="empty-text">No photos published yet.</p>';
+          return;
+        }
+
+        grid.innerHTML = "";
+        images.forEach((img) => {
+          const item = document.createElement("div");
+          item.className = "manage-item";
+          item.innerHTML = `
+          <img src="${img.image_url}" alt="${img.title}">
+          <div class="manage-item-info">
+            <h4>${img.title}</h4>
+            <span>${img.category}</span>
+            <button class="btn-delete" onclick="deleteItem('gallery_images', '${img.id}', fetchAdminGallery)">Delete</button>
+          </div>
+        `;
+          grid.appendChild(item);
+        });
+      }
+
+      // -------------------------------------------------------------
+      // 6. FEATURED MODELS DIRECTORY MANAGER
+      // -------------------------------------------------------------
+      document
+        .getElementById("modelForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("modelBtn");
+          btn.innerText = "Saving...";
+
+          try {
+            const name = document.getElementById("modelName").value;
+            const instagram_link =
+              document.getElementById("modelInstagram").value;
+            const tiktok_link = document.getElementById("modelTiktok").value;
+            const whatsapp_link =
+              document.getElementById("modelWhatsapp").value;
+            const file = document.getElementById("modelPhoto").files[0];
+
+            const imageUrl = await uploadToCloudinary(file);
+
+            const { error } = await supabaseClient
+              .from("featured_models")
+              .insert([
+                {
+                  name,
+                  image_url: imageUrl,
+                  instagram_link,
+                  tiktok_link,
+                  whatsapp_link,
+                },
+              ]);
+
+            if (error) throw error;
+            alert("Model profile added!");
+            e.target.reset();
+            fetchAdminModels();
+          } catch (err) {
+            alert("Error: " + err.message);
+          } finally {
+            btn.innerText = "Save Model Profile";
+          }
+        });
+
+      async function fetchAdminModels() {
+        if (!supabaseClient) return;
+        const { data: models } = await supabaseClient
+          .from("featured_models")
+          .select("*")
+          .order("created_at", { ascending: false });
+        const grid = document.getElementById("adminModelsGrid");
+
+        if (!models || models.length === 0) {
+          grid.innerHTML =
+            '<p class="empty-text">No model profiles added yet.</p>';
+          return;
+        }
+
+        grid.innerHTML = "";
+        models.forEach((model) => {
+          const item = document.createElement("div");
+          item.className = "manage-item";
+          item.innerHTML = `
+          <img src="${model.image_url}" alt="${model.name}">
+          <div class="manage-item-info">
+            <h4>${model.name}</h4>
+            <button class="btn-delete" onclick="deleteItem('featured_models', '${model.id}', fetchAdminModels)">Remove</button>
+          </div>
+        `;
+          grid.appendChild(item);
+        });
+      }
+
+      // Generic Delete Handler
+      async function deleteItem(table, id, refreshCallback) {
+        if (!confirm("Are you sure you want to delete this item?")) return;
+        await supabaseClient.from(table).delete().eq("id", id);
+        refreshCallback();
+      }
+
+      // Initialize lists on load
+      document.addEventListener("DOMContentLoaded", () => {
+        fetchAdminGallery();
+        fetchAdminModels();
+      });
+    </script>
+  </body>
+</html>
