@@ -703,48 +703,33 @@
 
       // 1. Save Profile Display Name & Device Avatar File
       document
-        .getElementById("adminProfileForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const updatedName = document
-            .getElementById("adminDisplayName")
-            .value.trim();
-          const fileInput = document.getElementById("adminAvatarFile");
+  .getElementById("adminProfileForm")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const updatedName = document
+      .getElementById("adminDisplayName")
+      .value.trim();
+    const fileInput = document.getElementById("adminAvatarFile");
 
-          let avatarDataUrl = localStorage.getItem("px_admin_avatar") || "";
+    let avatarDataUrl = localStorage.getItem("px_admin_avatar") || "";
 
-          if (fileInput.files && fileInput.files[0]) {
-            try {
-              avatarDataUrl = await convertFileToBase64(fileInput.files[0]);
-            } catch (err) {
-              alert("Error reading image file from storage.");
-              return;
-            }
-          }
+    if (fileInput.files && fileInput.files[0]) {
+      try {
+        avatarDataUrl = await convertFileToBase64(fileInput.files[0]);
+      } catch (err) {
+        alert("Error reading image file from storage.");
+        return;
+      }
+    }
 
-          if (supabaseClient) {
-            document
-              .getElementById("nav-loading-overlay")
-              .classList.add("active");
-            const { error } = await supabaseClient.auth.updateUser({
-              data: { full_name: updatedName, avatar_url: avatarDataUrl },
-            });
-            document
-              .getElementById("nav-loading-overlay")
-              .classList.remove("active");
+    // Since your admin panel uses a passcode system instead of Supabase Auth,
+    // we save the name and base64 avatar directly to localStorage and update the UI:
+    localStorage.setItem("px_admin_name", updatedName);
+    localStorage.setItem("px_admin_avatar", avatarDataUrl);
+    updateAvatarPreview(avatarDataUrl, updatedName);
 
-            if (error) {
-              alert("Failed to update profile in Supabase: " + error.message);
-              return;
-            }
-          }
-
-          localStorage.setItem("px_admin_name", updatedName);
-          localStorage.setItem("px_admin_avatar", avatarDataUrl);
-          updateAvatarPreview(avatarDataUrl, updatedName);
-
-          alert("Admin profile and avatar updated successfully!");
-        });
+    alert("Admin profile and avatar updated successfully!");
+  });
 
       // 2. Update Password via Supabase Auth
       document
